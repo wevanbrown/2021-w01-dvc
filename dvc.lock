@@ -1,0 +1,79 @@
+schema: '2.0'
+stages:
+  load_data:
+    cmd: python src/load_data.py --config=params.yaml
+    deps:
+    - path: data/external/heart.csv
+      md5: 0691643e62f74624d19253d61990b74b
+      size: 11323
+    - path: params.yaml
+      md5: ab51e1421867c54222f2aeb7ccdf56e1
+      size: 522
+    - path: src/get_data.py
+      md5: 09554b99a6e7e2d45b8b3040ea8a4596
+      size: 1254
+    - path: src/load_data.py
+      md5: fb3f142ea81068fc6d5e728ede01a515
+      size: 1167
+    outs:
+    - path: data/raw/heart.csv
+      md5: 7f7e38960a3a094106e6c308b9c67e26
+      size: 11583
+  split_data:
+    cmd: python src/split_data.py --config=params.yaml
+    deps:
+    - path: data/raw/heart.csv
+      md5: 7f7e38960a3a094106e6c308b9c67e26
+      size: 11583
+    - path: params.yaml
+      md5: ab51e1421867c54222f2aeb7ccdf56e1
+      size: 522
+    - path: src/split_data.py
+      md5: 3d9122832543434ea40f29f23fed300b
+      size: 1498
+    params:
+      params.yaml:
+        split_data.test_size: 0.2
+    outs:
+    - path: data/processed/test_heart.csv
+      md5: 980b334a771714571570ca8de7386bae
+      size: 2395
+    - path: data/processed/train_heart.csv
+      md5: 6ebb9db6cb1c0d1fa47d22ada72644f4
+      size: 9267
+  train_and_evaluate:
+    cmd:
+    - python src/train_and_evaluate.py --config=params.yaml
+    - dvc plots show
+    deps:
+    - path: data/processed/test_heart.csv
+      md5: 980b334a771714571570ca8de7386bae
+      size: 2395
+    - path: data/processed/train_heart.csv
+      md5: 6ebb9db6cb1c0d1fa47d22ada72644f4
+      size: 9267
+    - path: params.yaml
+      md5: ab51e1421867c54222f2aeb7ccdf56e1
+      size: 522
+    - path: src/train_and_evaluate.py
+      md5: 01a6a13b6f6f8269cb7d76928f83f040
+      size: 4912
+    params:
+      params.yaml:
+        train_and_evaluate.model: logistic_regression
+    outs:
+    - path: cm.csv
+      md5: c4cb6dbee0258214c2ce2d6311068e68
+      size: 323
+    - path: models/model.joblib
+      md5: 2cfa064d579ab96eb55b203a8d123d44
+      size: 886
+    - path: report/prc.json
+      md5: f465b60072625fbd0a790dcc35b75cd0
+      size: 274
+    - path: report/roc.json
+      md5: aca9f8d44777ebc72b6b24e19b6d5637
+      size: 342
+    - path: report/scores.json
+      md5: 864dcb528c2867f7ef9811088ca8c42d
+      size: 370
